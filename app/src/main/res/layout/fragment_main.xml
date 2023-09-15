@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".fragments.MainFragment">
+
+    <LinearLayout
+        android:id="@+id/ll_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/bt_to_down"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="弹窗" />
+
+        <Button
+            android:id="@+id/bt_install_apk"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="安装其他项目apk" />
+
+        <Button
+            android:id="@+id/bt_encode_qr_code"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="生成二维码" />
+
+        <Button
+            android:id="@+id/bt_decode_qr_code"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="扫描二维码" />
+
+        <Button
+            android:id="@+id/bt_zip"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="压缩解压" />
+
+        <Button
+            android:id="@+id/bt_send_broadcast"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="发送广播" />
+
+        <Button
+            android:id="@+id/bt_lazy_page"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="跳转LazyViewPage页面" />
+
+        <Button
+            android:id="@+id/bt_excel_form"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="excel 表格" />
+
+        <Button
+            android:id="@+id/bt_picture_graffiti"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="图片涂鸦" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_no_visit"
+        android:title="one" />
+
+    <item
+        android:id="@+id/nav_need_follow_up"
+        android:title="two" />
+
+    <item
+        android:id="@+id/nav_already_visit"
+        android:title="three" />
+
+</menu>

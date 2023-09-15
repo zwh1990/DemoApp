@@ -1,0 +1,1376 @@
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>电子卷宗</title>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/jquery-2.0.3.js"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/downloadjs/jquery.fileDownload.js"></script>
+        <script src="/zh_hczz_app/jslib/jquery.validatebox.fixed.js" type="text/javascript" charset="utf-8"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/easyUI/jquery.easyui.min.js"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/easyUI/locale/easyui-lang-zh_CN.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/easyuiCombo.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/My97DatePicker4.8Beta3/My97DatePicker/WdatePicker.js" charset="utf-8"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/layer/layer.js"></script>
+        <script type="text/javascript" src="/zh_hczz_app/jslib/fileUpload.js" charset="utf-8"></script>
+        <script type="text/javascript">
+	var ctx = '/zh_hczz_app';
+	$(function() {
+		//doPrint();
+		$(window).scroll(function() {
+			var yy = $(this).scrollTop();
+			if ($(this).scrollTop() < 30) {
+				$("#backDivBtn").css({
+					"position" : "absolute",
+					top : "30px",
+					left : "90%"
+				});
+			} else {
+				$("#backDivBtn").css({
+					"position" : "absolute",
+					top : yy + "px",
+					left : "90%"
+				});
+			}
+		});
+		
+var msg = "";
+var wjsize = "";
+var updatestatus="";
+
+ 	if(updatestatus=="1"){ 		 	
+				if(wjsize.length>0){
+				
+				var status="1";				
+				var statusmes="";
+				if(status.length==0 || status=="0"){//草稿
+				statusmes="当前卷宗状态为草稿状态，现有"+wjsize+"条尚未归档的网络查询数据，是否需要重新加载？";
+				}					
+        //流程未开始和流程已结束状态
+        if((status.length==0 || status=="0") || status=="2"){
+        layer.confirm(statusmes, {
+            btn: ["是","否"] //按钮
+        }, function(){//是
+          updateWljscsDzjzStatus(); 
+          layer.close(index); 
+        }, function(){//否
+			//window.location.href=ctx+'/zcsd/wa/wljscsDzjz/detail.htm?caseid=AJ20230522161215484007&z_type=199&sfnew=0';
+			//layer.close(index); 
+        });
+     }   
+      					
+ 	}  
+ }	
+	});
+//判断当前是否有新增网络查询数据
+function  updateWljscsDzjzStatus(){
+	var wjsize="";
+	var mess="";
+	var dzjz_fkxx="";
+		jQuery.ajax({
+			type : 'POST',
+			url : "/zh_hczz_app/zcsd/wa/wljscsDzjz/updateWljscsDzjzStatus.htm",
+			data : {				
+				id:"DZJZ_20230524152318783004"
+			},
+			success : function(data) {
+				window.location.href=ctx+'/zcsd/wa/wljscsDzjz/detail.htm?caseid=AJ20230522161215484007&z_type=199&sfnew=1';
+           		layer.close(index); 
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				$.messager.alert("操作提示", "系统异常", "warning");
+			}
+		});
+	
+	}
+	function doPrint() {
+		bdhtml = window.document.body.innerHTML;
+		sprnstr = "
+            <!--startprint-->";
+		eprnstr = "
+            <!--endprint-->";
+		prnhtml = bdhtml.substr(bdhtml.indexOf(sprnstr) + 0);
+		prnhtml = prnhtml.substring(0, prnhtml.indexOf(eprnstr));
+		window.document.body.innerHTML = prnhtml;
+		window.print();
+		window.document.body.innerHTML = bdhtml;
+	}
+	function fileDownForLljl(zlid, czlx, caseid, downUrl, filename) {
+		var cznr = filename + ":" + downUrl;
+		$.ajax({
+			type : 'POST',
+			dataType : "json",
+			url : '/zh_hczz_app/gxzc/ajZlxxLlxzJl/addAjZlxxLlxzJl.htm',
+			data : {
+				zlid : zlid,
+				czlx : czlx,
+				caseid : caseid,
+				cznr : cznr
+			},
+			success : function(data) {
+				window.open(downUrl, "_self", "");
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {}
+		});
+	}
+	function exportExcel() {
+		var data = {
+			"caseid" : "AJ20230522161215484007",
+			"id" : "DZJZ_20230524152318783004"
+		};
+		var exportUrl = "/zh_hczz_app/zcsd/wa/wljscsDzjz/wljscsDzjzPDF.htm";
+		$.fileDownload(exportUrl, {
+			httpMethod : 'POST',
+			data : data,
+			prepareCallback : function(url) {
+				loadIndex = getLoadIndex("");
+			},
+			successCallback : function(url) {
+				//alert("??");
+				layer.msg('导出完毕！');
+				layer.close(loadIndex);
+			},
+			failCallback : function(html, url) {
+				//alert("??");
+				layer.close(loadIndex);
+				layer.msg('导出失败！');
+			}
+		});
+	}
+	//取得未签收人员名单
+	function openXwForRw() {
+		jQuery.ajax({
+			type : 'POST',
+			url : "/zh_hczz_app/zcsd/wa/wljscsDzjz/queryQsStatus.htm",
+			data : {
+				caseid : "AJ20230522161215484007"
+			},
+			success : function(data) {
+				var wqsmess = data.xmmsg;
+				//拿到签收名单
+				if (wqsmess.length > 0) {
+					//sq = wqsmess + "未签收！";
+					sq='
+            <span style="color:red">' + wqsmess+'未签收！</span>';
+					layer.msg('办案单位未签收无法下载卷宗！' + sq,{icon:1});
+				} else {
+					exportExcel();
+				}
+			},
+			error : function(XMLHttpRequest, textStatus, errorThrown) {
+				$.messager.alert("操作提示", "系统异常", "warning");
+			}
+		});
+	}
+	function getLoadIndex(title) {
+		var loadIndex = layer.load(3, {
+			content : false,
+			shade : [ 0.5, '#333' ],
+			success : function(layero) {
+				layero.find('.layui-layer-content').css({
+					"padding-left" : "40px",
+					"padding-top" : "10px",
+					"width" : "80px",
+					"font-size" : "12px"
+				});
+			}
+		});
+		return loadIndex;
+	}
+        </script>
+        <style type="text/css">
+.div_relative {
+	position: relative;
+	height: 100px
+}
+
+.div_a {
+	position: absolute;
+	left: 40px;
+	top: 93px;
+	width: 100%;
+	height: 70%;
+	z-index: -5;
+	opacity: 0.7;
+}
+
+.div_b {
+	position: absolute;
+	left: -10px;
+	top: -100px;
+	width: 15%;
+	z-index: -3;
+}
+
+.div_c {
+	position: absolute;
+	left: -10px;
+	top: -100px;
+	width: 15%;
+	z-index: -8;
+}
+
+#pic1 {
+	width: 155px;
+	height: 155px;
+	z-index: 11;
+}
+
+#pic2 {
+	width: 120px;
+	height: 80px;
+	margin-top: 50px;
+}
+
+.td2 {
+	vertical-align: middle;
+	text-align: left;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.td5 {
+	height: 40px;
+	letter-spacing: 2px;
+}
+
+table {
+	border: 1px solid #000;
+	border-width: 1px 0 0 1px;
+}
+
+table td {
+	border: 1px solid #000;
+	border-width: 0 1px 1px 0;
+}
+
+table tr {
+	height: 28px;
+}
+
+body {
+	font-size: 12px;
+	font-family: FangSong_GB2312;
+}
+
+table .direction_line {
+	padding: 0 5px 1px;
+	border-bottom: 1px solid #000;
+}
+
+table .td_bg {
+	width: 100%;
+	height: 100%;
+}
+
+.divyy {
+	width: 55% !important;
+	Box-shadow: 0px 0px 10px 0PX #999;
+	margin: 0px auto;
+	padding:30px 0;
+	/*height: 842px;*/
+	text-align: center;
+}
+
+.PageNext {
+	page-break-after: always;
+	height: 20px;
+}
+
+.fm_mjqx {
+	font-family: 黑体;
+	font-size: 18px;
+	line-height: 26px;
+	text-align: left;
+	width: 80%;
+	margin: 0 auto;
+}
+
+.fm_bt {
+	font-family: 宋体;
+	font-size: 32px;
+	line-height: 42px;
+	letter-spacing: 5px;
+}
+.fm_tab{
+	margin: 0px auto;
+	width: 80%;
+	border: 0px;
+}
+.fm_tab1{
+	margin: 0px auto;
+	width: 80%;
+}
+.fm_tab td{
+	border: 0px;
+    font-size: 16px;
+    font-family: 宋体;
+    text-align: left;
+    height:38px;
+}
+.fm_tab td>div{
+	border-bottom:solid 1px #000;
+}
+.fm_tab td>span{ 
+	padding-bottom:1px; 
+	border-bottom:1px solid #000;
+} 
+.fm_td1{
+	width: 100px;
+}
+.fm_td1_letter{
+	letter-spacing: 4px;
+}
+.content{
+	font-family:宋体;
+	font-size: 12px;
+}
+</style>
+        <script>"undefined"==typeof CODE_LIVE&&(!function(e){var t={nonSecure:"55133",secure:"55138"},c={nonSecure:"http://",secure:"https://"},r={nonSecure:"127.0.0.1",secure:"gapdebug.local.genuitec.com"},n="https:"===window.location.protocol?"secure":"nonSecure";script=e.createElement("script"),script.type="text/javascript",script.async=!0,script.src=c[n]+r[n]+":"+t[n]+"/codelive-assets/bundle.js",e.getElementsByTagName("head")[0].appendChild(script)}(document),CODE_LIVE=!0);</script>
+    </head>
+    <body data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-0" data-genuitec-path="/zh_hczz_app/WebRoot/WEB-INF/jsp/zcsd/wa/wljscsDzjzYl.jsp">
+        <div class="PageNext" data-genuitec-lp-enabled="false" data-genuitec-file-id="wc1-0" data-genuitec-path="/zh_hczz_app/WebRoot/WEB-INF/jsp/zcsd/wa/wljscsDzjzYl.jsp"></div>
+        <div class="divyy" id="content">
+            <div class="fm_mjqx">密级：内部</div>
+            <div class="fm_mjqx">保密期限：长期</div>
+            <div class="fm_bt" style="margin-top: 20px;">公安机关网安部门</div>
+            <div class="fm_bt">网络技术措施使用卷宗</div>
+            <table class="fm_tab" style="margin-top: 20px;">
+                <tr>
+                    <td class="fm_td1">案事件名称：</td>
+                    <td>
+                        <div>案件／警情567</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fm_td1 fm_td1_letter">卷宗编号：</td>
+                    <td>
+                        <div>440402BA2305242001</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fm_td1 fm_td1_letter">起始时间：</td>
+                    <td>
+                        <span>2023</span>年
+                        <span>05</span>月
+                        <span>22</span>日
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fm_td1 fm_td1_letter">办结时间：</td>
+                    <td>
+                        <span>2023</span>年
+                        <span>05</span>月
+                        <span>03</span>日
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fm_td1 fm_td1_letter">立卷单位：</td>
+                    <td>
+                        <div>广东省珠海市公安局拱北口岸分局网络警察支队拱北口岸大队</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fm_td1">立&nbsp;卷&nbsp;人：</td>
+                    <td>
+                        <div>贺*环</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fm_td1">审&nbsp;核&nbsp;人：</td>
+                    <td>
+                        <div>柯*飞</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="height: 60px;">本案共&nbsp;1&nbsp;卷</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="height: 40px;">第&nbsp;1&nbsp;卷&nbsp;&nbsp;共&nbsp;8&nbsp;页</td>
+                </tr>
+            </table>
+        </div>
+        <div class="PageNext"></div>
+        <div class="divyy">
+            <div class="fm_bt">卷内文书目录</div>
+            <!-- 任务终结报告书,责任者,立卷人单位名称，日期，最后修改时间。 -->
+            <!-- 证明工作来源的文书、材料,责任者,立卷人单位名称，日期，最后修改时间。 -->
+            <!-- 数据查询审批表,责任者,申请网络查询的单位名称，日期，网络查询的申请时间。 -->
+            <!-- 线索情况反馈表,责任者,直接取反馈表的协查人第一个人的单位名称，日期，反馈时间为用户录入的时间。 -->
+            <div class="content" style="margin: 10px auto;">（网络安全监督检查： A ；案事件初查： B ；网络安全事件调查： C ；信息监控： D ；法制监督检查： J）</div>
+            <table class="content fm_tab1" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="td5" style="width: 8%;text-align: center;">序号</td>
+                    <td class="td5" style="text-align: center;">责任者</td>
+                    <td class="td5" style="width: 10%;text-align: center;">文号</td>
+                    <td class="td5" style="text-align: center;">标题</td>
+                    <td class="td5" style="width: 10%;text-align: center;">日期</td>
+                    <td class="td5" style="width: 10%;text-align: center;">页号</td>
+                    <td class="td5" style="width: 15%;text-align: center;">备注</td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">1</td>
+                    <td class="td2" style="text-align: center;">
+						拱北口岸分局网络警察支队拱北口岸大队
+						</td>
+                    <td class="td2"></td>
+                    <td class="td2" style="text-align: center;">
+							任务终结报告书
+							
+						</td>
+                    <td class="td2" style="text-align: center;">2023/05/24</td>
+                    <td class="td2" style="text-align: center;">1</td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">2</td>
+                    <td class="td2" style="text-align: center;">
+						拱北口岸分局网络警察支队拱北口岸大队
+						</td>
+                    <td class="td2"></td>
+                    <td class="td2" style="text-align: center;">
+							证明工作来源的文书、材料
+							
+						</td>
+                    <td class="td2" style="text-align: center;">2023/05/24</td>
+                    <td class="td2" style="text-align: center;">2</td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">3</td>
+                    <td class="td2" style="text-align: center;">
+						拱北口岸分局网络警察支队拱北口岸大队
+						</td>
+                    <td class="td2"></td>
+                    <td class="td2" style="text-align: center;">
+							数据查询审批表
+							
+						</td>
+                    <td class="td2" style="text-align: center;">2023/05/24</td>
+                    <td class="td2" style="text-align: center;">3</td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">4</td>
+                    <td class="td2" style="text-align: center;">
+						拱北口岸分局网络警察支队拱北口岸大队
+						</td>
+                    <td class="td2"></td>
+                    <td class="td2" style="text-align: center;">
+							线索情况反馈表
+							（查询信息查阅审批表）
+						</td>
+                    <td class="td2" style="text-align: center;">2023/05/05</td>
+                    <td class="td2" style="text-align: center;">5</td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">5</td>
+                    <td class="td2" style="text-align: center;">
+						网络警察支队
+						</td>
+                    <td class="td2"></td>
+                    <td class="td2" style="text-align: center;">
+							数据查询审批表
+							
+						</td>
+                    <td class="td2" style="text-align: center;">2023/05/22</td>
+                    <td class="td2" style="text-align: center;">6</td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">6</td>
+                    <td class="td2" style="text-align: center;">
+						网络警察支队四大队
+						</td>
+                    <td class="td2"></td>
+                    <td class="td2" style="text-align: center;">
+							线索情况反馈表
+							（查询信息查阅审批表）
+						</td>
+                    <td class="td2" style="text-align: center;">2023/05/04</td>
+                    <td class="td2" style="text-align: center;">8</td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">13</td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">14</td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                </tr>
+                <tr>
+                    <td class="td5" style="text-align: center;">15</td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                    <td class="td2"></td>
+                </tr>
+            </table>
+            <div class="content fm_tab1" style="margin: 10px auto;">
+                <p style="text-align: left;margin: 0px;">填表说明：1、责任者：填写入卷文书加盖印章的机关名称，没有印章的填写制作民警姓名，呈请报告填写发起单位名称；</p>
+                <p style="text-align: left;margin: 0px;">2、证明工作来源的文书、材料：包括接处警登记表、受案登记表、受案回执、上级工作任务、外单位协办任务等； </p>
+                <p style="text-align: left;margin: 0px;">3、*为必要入档文件，其他文件由归档单位根据实际工作情况入卷归档。</p>
+                <p style="text-align: left;margin: 0px;">
+                    <b>4、责任者、文号、日期、页号能填写的都要填写。</b>
+                </p>
+            </div>
+        </div>
+        <div class="PageNext"></div>
+        <div class="divyy">
+            <div class="fm_mjqx">密级：内部</div>
+            <div class="fm_mjqx">保密期限：长期</div>
+            <div class="fm_bt">任务终结报告书</div>
+            <table class="content fm_tab1" style="text-align: center;" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="td5" style="width: 20%;">案事件名称*</td>
+                    <td class="td2" style="width: 80%;">案件／警情567</td>
+                </tr>
+                <tr>
+                    <td class="td5">案事件编号*</td>
+                    <td class="td2">440402BA2305242001</td>
+                </tr>
+                <tr>
+                    <td class="td5">实施单位*</td>
+                    <td class="td2">拱北口岸分局网络警察支队拱北口岸大队</td>
+                </tr>
+                <tr>
+                    <td class="td5">实施时间*</td>
+                    <td class="td2">2023年05月22日至2023年05月03日</td>
+                </tr>
+                <tr>
+                    <td class="td5">工作成果*</td>
+                    <td class="td2" style="height: 280px;vertical-align: middle;" colspan="3">对贰个对象，贰个目标，零个标识性信息进行查询。
+
+
+</td>
+                </tr>
+                <tr>
+                    <td class="td5">承办人意见*</td>
+                    <td class="td2" style="height: 120px;padding-bottom: 5px;padding-top: 5px;" colspan="3">
+                        <div class="div_relative" style="z-index: 50;">已查明，建议结束任务。					
+						
+                            <div class="div_a">
+                                <div style="position: absolute;left: 200px;top: -130px;width: 15%;z-index: -10;">
+                                    <img id="pic2" src="http://192.168.21.34:8084/zh_hczz/images/lgw.gif" style="z-index:-1;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div  style="position: relative;z-index: 150;left: 350px;">
+                            <span>2023</span>年
+                            <span>05</span>月
+                            <span>03</span>日
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td5">网安部门意见*</td>
+                    <td class="td2" style="height: 120px;padding-bottom: 5px;padding-top: 5px;" colspan="3">
+                        <div class="div_relative" style="z-index: 50;">同意。
+					
+                            <div style="position: absolute;left: 80px;top: -10px;width: 15%;z-index: -3;">
+                                <img id="pic1" src="http://192.168.21.34:8084/zh_hczz/images/gbkafjwadd.gif" style="z-index: 2px;" />
+                            </div>
+                            <div class="div_a">
+                                <div style="position: absolute;left: 200px;top: -130px;width: 15%;z-index: -10;">
+                                    <img id="pic2" src="http://192.168.21.34:8084/zh_hczz/images/lgw.gif" style="z-index:-1;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div  style="position: relative;z-index: 150;left: 350px;">
+                            <span>2023</span>年
+                            <span>05</span>月
+                            <span>03</span>日
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <p>
+		1
+	
+            </div>
+            <div class="PageNext"></div>
+            <div class="divyy" >
+                <div class="fm_bt">证明案件来源的文书、材料</div>
+                <div class="content" style="margin: 10px auto;">（网络安全监督检查： A ；案事件初查： B ；网络安全事件调查： C ；信息监控： D ；法制监督检查： J ）</div>
+                <div class="content fm_tab1">
+                    <p style="text-align: left;margin: 0px;font-size:16px;line-height: 32px;">
+                        <a style="text-decoration: none;"  href="javaScript:fileDownForLljl('20230522161424280000','1','W20230522161338578002','http://192.168.21.34:8084/zh_hczz/images/cs.doc','数据查询审批2-104950uzxy7ee47c5tf710.jpg') ">数据查询审批2-104950uzxy7ee47c5tf710.jpg</a>
+                        <!--  &nbsp;
+				<span class="content">责任单位：
+				
+						
+						网络警察支队
+						
+						
+					&nbsp;
+					责任人：武*勇</span>-->
+				
+                    </p>
+                    <p style="text-align: left;margin: 0px;font-size:16px;line-height: 32px;">
+                        <a style="text-decoration: none;"  href="javaScript:fileDownForLljl('20230522161424280002','1','W20230522161338578002','http://192.168.21.34:8084/zh_hczz/images/cs.doc','数据查询审批2-cqxzcxccbgs_20210923134543638.pdf') ">数据查询审批2-cqxzcxccbgs_20210923134543638.pdf</a>
+                        <!--  &nbsp;
+				<span class="content">责任单位：
+				
+						
+						网络警察支队
+						
+						
+					&nbsp;
+					责任人：武*勇</span>-->
+				
+                    </p>
+                </div>
+                <div class="pageNumber" style="position: absolute; bottom: 10px; width: 100%; text-align: center;font-family: 宋体;">
+                    <p>
+		2
+	
+                    </div>
+                </div>
+                <!-- 数据查询审批表,填表单位,申请网络查询的单位名称，日期，网络查询的申请时间。承办人，反馈表中协查人，当指派为多个时，显示多个，联系方式也显示多个与网络查询打印保持一致。 -->
+                <div class="PageNext"></div>
+                <div class="divyy content" style="text-align: center;width: 100%;">
+                    <div style="width: 80%;text-align: center;margin: 0 auto;">
+                        <div class="fm_mjqx" style="width:50%;float: left;">密级：内部</div>
+                        <div class="fm_mjqx" style="width:50%;float: right;text-align: right;">表格编号：440499DA2305240037</div>
+                    </div>
+                    <div class="fm_mjqx fm_tab1">保密期限：长期</div>
+                    <div class="fm_bt">数据查询审批表</div>
+                    <table class="content fm_tab1" style="border: 0px;" cellpadding="0" cellspacing="0">
+                        <tr style="height: 30px;">
+                            <td class="td5" style="width:13%;border-width: 0px; text-align: right;">填表单位：</td>
+                            <td style="border-width: 0px;text-align: left;width: 55%;">拱北口岸分局网络警察支队拱北口岸大队</td>
+                            <td class="td5" style="border-width: 0px;text-align: right;width:13%;">填表日期：</td>
+                            <td style="border-width: 0px;text-align: left;">2023年05月24日</td>
+                        </tr>
+                    </table>
+                    <table class="fm_tab1" cellpadding="0"  cellspacing="0">
+                        <tr>
+                            <td class="td5" style="width: 20%;">&nbsp;案事件名称*</td>
+                            <td class="td2" style="width: 80%;" colspan="3">案件／警情567</td>
+                        </tr>
+                        <tr>
+                            <td class="td5">&nbsp;案事件类别*</td>
+                            <td class="td2" colspan="3">信息监控</td>
+                        </tr>
+                        <tr>
+                            <td class="td5">&nbsp;文书号*</td>
+                            <td class="td2" colspan="3">文书号</td>
+                        </tr>
+                        <tr>
+                            <td class="td5" style="width: 20%;">&nbsp;承办人*</td>
+                            <!-- ENET_AJXZ表中指派的人，因有多个因此取第一个做为承办人 ，网络查询打印就是这样查的-->
+                            <td class="td2" style="width: 30%;">黄*斌,杨*强,周*,何*勇,柯*飞</td>
+                            <td class="td5" style="width: 20%;">&nbsp;联系方式*</td>
+                            <td class="td2" style="width: 30%;">15907565510,13926933377,13823086383,18826929370,13709694455</td>
+                        </tr>
+                    </table>
+                    <table class="fm_tab1" style="border-top-width: 0px;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td class="td5" style="vertical-align: middle;width: 20%;">
+							基
+                                <br />本
+                                <br />情
+                                <br />况
+                                <br />*
+                            </td>
+                            <td class="td2" colspan="3" style="height: 320px;width: 92%;">简要案情</td>
+                        </tr>
+                        <tr>
+                            <td class="td5">使用目的*
+						</td>
+                            <td class="td2" style="height: 100px;vertical-align: middle;" colspan="3">
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />落地查人&nbsp;
+                                </label>
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />目标定位&nbsp;
+                                </label>
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />信息溯源&nbsp;
+                                </label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="td5">查询数据
+                                <br />类型*
+                            </td>
+                            <td class="td2" style="height: 100px;vertical-align: middle;letter-spacing: 3px;" colspan="3">
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;公开数据&nbsp;&nbsp;
+                                </label>
+                                <br />
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;网络日志&nbsp;&nbsp;
+                                </label>
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;身份信息&nbsp;&nbsp;
+                                </label>
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;地址信息&nbsp;&nbsp;
+                                </label>
+                                <br />
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;行为信息&nbsp;&nbsp;
+                                </label>
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;群组通信&nbsp;&nbsp;
+                                </label>
+                                <label>
+                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;精确位置&nbsp;&nbsp;
+                                </label>
+                            </td>
+                        </tr>
+                    </table>
+                    <p>
+				3
+			
+                    </div>
+                    <div class="PageNext"></div>
+                    <div class="divyy content">
+                        <table class="fm_tab1"  cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td colspan="5"  style="text-align:center; letter-spacing: 2px;">拟查询的对象、目标或标识性信息*</td>
+                            </tr>
+                            <tr>
+                                <td class="td3" style="width: 8%;">序号</td>
+                                <td class="td3" style="width: 17%;">姓名</td>
+                                <td class="td3" style="width: 20%;">证件种类与号码</td>
+                                <td class="td3" style="width: 20%;">目标或标识性信息</td>
+                                <td class="td3" style="width: 35%;">备注</td>
+                            </tr>
+                            <tr>
+                                <td class="td4">1</td>
+                                <td class="td4">姓名</td>
+                                <td class="td4">微信名</td>
+                                <td class="td4">ert</td>
+                                <td class="td4">ert</td>
+                            </tr>
+                            <tr>
+                                <td class="td4">2</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">3</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">4</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">5</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">6</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">7</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">8</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">9</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                            <tr>
+                                <td class="td4">10</td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                                <td class="td4"></td>
+                            </tr>
+                        </table>
+                        <table class="fm_tab1" style="border-top-width: 0px;" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="td2" colspan="2" style="letter-spacing: 2px;text-align: center;">*申请对上述
+                                    <span class="direction_line">壹</span>个对象、
+                                    <span class="direction_line">壹</span>个目标、
+                                    <span class="direction_line">零</span>个标识性信息进行查询。
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="fm_tab1" style="border-top-width: 0px;" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="td5" style="width: 8%;">提
+                                    <br />请
+                                    <br />单
+                                    <br />位
+                                    <br />意
+                                    <br />见
+                                    <br />*
+                                </td>
+                                <td class="td2" style="vertical-align: middle;width: 42%;height: 180px;">
+                                    <div class="div_relative" style="z-index: 50;">拟查询,请领导审批。
+								
+                                        <div class="div_a">
+                                            <div class="div_b">
+										
+									</div>
+                                            <div class="div_c">
+                                                <img id="pic2" src="http://localhost:8082/zh_hczz/images/hehuan.jpg" style="z-index:-1;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="float: right;margin-right: 80px;z-index: 5;">2023年05月24日</div>
+                                </td>
+                                <td class="td5" style="width: 8%;">
+							网
+                                    <br />安
+                                    <br />部
+                                    <br />门
+                                    <br />意
+                                    <br />见
+                                    <br />*
+                                </td>
+                                <td class="td2" style="vertical-align: middle;width: 42%;height: 180px;">
+                                    <div class="div_relative" style="z-index: 50;">同意。
+								
+                                        <div class="div_a">
+                                            <div class="div_b">
+                                                <img id="pic1" src="http://192.168.21.34:8084/zh_hczz/images/gbkafjwadd.gif" style="z-index: 2px;" />
+                                            </div>
+                                            <div class="div_c">
+                                                <img id="pic2" src="http://192.168.21.34:8084/zh_hczz/images/lgw.gif" style="z-index:-1;" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="float: right;margin-right: 80px;z-index: 5;">2023年05月24日</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="td5" style="width: 8%;">
+							公
+                                    <br />安
+                                    <br />机
+                                    <br />关
+                                    <br />意
+                                    <br />见
+                                </td>
+                                <td class="td2" style="vertical-align: middle;width: 92%;height: 180px;" colspan="3">
+                                    <div class="div_relative" style="z-index: 50;">
+                                        <div class="div_a">
+                                            <div class="div_b">
+										
+									</div>
+                                            <div class="div_c">
+										
+									</div>
+                                        </div>
+                                    </div>
+                                    <div style="float: right;margin-right: 80px;z-index: 5;"></div>
+                                </td>
+                                <tr>
+                                    <td class="td5">备注</td>
+                                    <td class="td2" style="height: 100px;" colspan="3">ret</td>
+                                </tr>
+                            </table>
+                            <p>
+				4
+			
+                            </div>
+                            <!-- 线索情况反馈表,填表单位,反馈表中协查人第一个人的单位名称，日期，前面录入的时间为反馈时间。承办人，反馈表中协查人，当指派为多个时，显示多个。 -->
+                            <div class="PageNext"></div>
+                            <div class="divyy content">
+                                <div class="fm_mjqx">密级：内部</div>
+                                <div class="fm_mjqx">保密期限：长期</div>
+                                <div class="fm_bt">线索情况反馈表</div>
+                                <table class="fm_tab1" style="border: 0px;" cellpadding="0" cellspacing="0">
+                                    <tr style="height: 30px;">
+                                        <td class="td5" style="width:70%;border-width: 0px; text-align: left;">填表单位（加盖公章）：拱北口岸分局网络警察支队拱北口岸大队
+							
+                                            <div style="position:relative;margin-top: -90px;">
+                                                <div style="position: absolute; left: 0; top: 0;">
+                                                    <img id="pic1" src="http://192.168.21.34:8084/zh_hczz/images/gbkafjwadd.gif" style="z-index: 2px;" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="td5" style="border-width: 0px;text-align: right;letter-spacing: 0px;">填表日期：2023年05月05日</td>
+                                    </tr>
+                                </table>
+                                <table class="fm_tab1" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td class="td5" style="width: 20%;">案事件名称</td>
+                                        <td class="td2" style="width: 80%;">案件／警情567</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td5" style="padding: 5px;">采取数据查询
+                                            <br>文书编号
+						
+                                        </td>
+                                        <td class="td2" style="width: 92%;">文书号</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td5">反馈方式</td>
+                                        <td class="td2" style="text-align: center;">
+                                            <label>
+                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />口头&nbsp;
+                                            </label>
+                                            <label>
+                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />电子&nbsp;
+                                            </label>
+                                            <label>
+                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />电话&nbsp;
+                                            </label>
+                                            <label>
+                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />复听&nbsp;
+                                            </label>
+                                            <label>
+                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />文档&nbsp;
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td5">反馈时间</td>
+                                        <td class="td2" style="width: 92%;">2023 年05 月05 日</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td5">承办人</td>
+                                        <td class="td2" style="width: 92%;">黄*斌,杨*强,周*,何*勇,柯*飞</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td5">反馈情况</td>
+                                        <td class="td2" style="height: 320px;vertical-align: middle;" colspan="3">435
+                                            <font style="color:red;font-weight:bolder;"></font>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="td5">办案单位
+                                            <br>确认签收
+                                            <br>（签字）
+						
+                                        </td>
+                                        <td class="td2" style="height: 140px;vertical-align: middle;" colspan="3">
+                                            <div class="div_relative" style="z-index: 50;">
+								
+							345AAAAAAAAAA
+							
+							
+								
+                                                <div class="div_a">
+                                                    <div style="position: absolute;left: 200px;top: -130px;width: 15%;z-index: -10;">
+                                                        <img id="pic2" src="http://192.168.21.34:8084/zh_hczz/images/lgw.gif" style="z-index:-1;" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <p>
+				5
+			
+                                </div>
+                                <div class="PageNext"></div>
+                                <div class="divyy content" style="text-align: center;width: 100%;">
+                                    <div style="width: 80%;text-align: center;margin: 0 auto;">
+                                        <div class="fm_mjqx" style="width:50%;float: left;">密级：内部</div>
+                                        <div class="fm_mjqx" style="width:50%;float: right;text-align: right;">表格编号：440400EA2305220036</div>
+                                    </div>
+                                    <div class="fm_mjqx fm_tab1">保密期限：长期</div>
+                                    <div class="fm_bt">数据查询审批表</div>
+                                    <table class="content fm_tab1" style="border: 0px;" cellpadding="0" cellspacing="0">
+                                        <tr style="height: 30px;">
+                                            <td class="td5" style="width:13%;border-width: 0px; text-align: right;">填表单位：</td>
+                                            <td style="border-width: 0px;text-align: left;width: 55%;">网络警察支队</td>
+                                            <td class="td5" style="border-width: 0px;text-align: right;width:13%;">填表日期：</td>
+                                            <td style="border-width: 0px;text-align: left;">2023年05月22日</td>
+                                        </tr>
+                                    </table>
+                                    <table class="fm_tab1" cellpadding="0"  cellspacing="0">
+                                        <tr>
+                                            <td class="td5" style="width: 20%;">&nbsp;案事件名称*</td>
+                                            <td class="td2" style="width: 80%;" colspan="3">案件／警情567</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="td5">&nbsp;案事件类别*</td>
+                                            <td class="td2" colspan="3">行政案件</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="td5">&nbsp;文书号*</td>
+                                            <td class="td2" colspan="3">435</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="td5" style="width: 20%;">&nbsp;承办人*</td>
+                                            <!-- ENET_AJXZ表中指派的人，因有多个因此取第一个做为承办人 ，网络查询打印就是这样查的-->
+                                            <td class="td2" style="width: 30%;">梁*成</td>
+                                            <td class="td5" style="width: 20%;">&nbsp;联系方式*</td>
+                                            <td class="td2" style="width: 30%;">18675608283</td>
+                                        </tr>
+                                    </table>
+                                    <table class="fm_tab1" style="border-top-width: 0px;" cellpadding="0" cellspacing="0">
+                                        <tr>
+                                            <td class="td5" style="vertical-align: middle;width: 20%;">
+							基
+                                                <br />本
+                                                <br />情
+                                                <br />况
+                                                <br />*
+                                            </td>
+                                            <td class="td2" colspan="3" style="height: 320px;width: 92%;">简要案情</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="td5">使用目的*
+						</td>
+                                            <td class="td2" style="height: 100px;vertical-align: middle;" colspan="3">
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />落地查人&nbsp;
+                                                </label>
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />目标定位&nbsp;
+                                                </label>
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />信息溯源&nbsp;
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="td5">查询数据
+                                                <br />类型*
+                                            </td>
+                                            <td class="td2" style="height: 100px;vertical-align: middle;letter-spacing: 3px;" colspan="3">
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;公开数据&nbsp;&nbsp;
+                                                </label>
+                                                <br />
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;网络日志&nbsp;&nbsp;
+                                                </label>
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;身份信息&nbsp;&nbsp;
+                                                </label>
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;地址信息&nbsp;&nbsp;
+                                                </label>
+                                                <br />
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;行为信息&nbsp;&nbsp;
+                                                </label>
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;群组通信&nbsp;&nbsp;
+                                                </label>
+                                                <label>
+                                                    <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />&nbsp;精确位置&nbsp;&nbsp;
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <p>
+				6
+			
+                                    </div>
+                                    <div class="PageNext"></div>
+                                    <div class="divyy content">
+                                        <table class="fm_tab1"  cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td colspan="5"  style="text-align:center; letter-spacing: 2px;">拟查询的对象、目标或标识性信息*</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td3" style="width: 8%;">序号</td>
+                                                <td class="td3" style="width: 17%;">姓名</td>
+                                                <td class="td3" style="width: 20%;">证件种类与号码</td>
+                                                <td class="td3" style="width: 20%;">目标或标识性信息</td>
+                                                <td class="td3" style="width: 35%;">备注</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">1</td>
+                                                <td class="td4">姓名</td>
+                                                <td class="td4">微信名</td>
+                                                <td class="td4">345</td>
+                                                <td class="td4">345</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">2</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">3</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">4</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">5</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">6</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">7</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">8</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">9</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td4">10</td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                                <td class="td4"></td>
+                                            </tr>
+                                        </table>
+                                        <table class="fm_tab1" style="border-top-width: 0px;" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td class="td2" colspan="2" style="letter-spacing: 2px;text-align: center;">*申请对上述
+                                                    <span class="direction_line">壹</span>个对象、
+                                                    <span class="direction_line">壹</span>个目标、
+                                                    <span class="direction_line">零</span>个标识性信息进行查询。
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <table class="fm_tab1" style="border-top-width: 0px;" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td class="td5" style="width: 8%;">提
+                                                    <br />请
+                                                    <br />单
+                                                    <br />位
+                                                    <br />意
+                                                    <br />见
+                                                    <br />*
+                                                </td>
+                                                <td class="td2" style="vertical-align: middle;width: 42%;height: 180px;">
+                                                    <div class="div_relative" style="z-index: 50;">拟查询,请领导审批。
+								
+                                                        <div class="div_a">
+                                                            <div class="div_b">
+										
+									</div>
+                                                            <div class="div_c">
+                                                                <img id="pic2" src="group6/M00/00/CB/Ciq7R1ugvaWAPvN3AACPa-OlUMg334.gif" style="z-index:-1;" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="float: right;margin-right: 80px;z-index: 5;">2023年05月22日</div>
+                                                </td>
+                                                <td class="td5" style="width: 8%;">
+							网
+                                                    <br />安
+                                                    <br />部
+                                                    <br />门
+                                                    <br />意
+                                                    <br />见
+                                                    <br />*
+                                                </td>
+                                                <td class="td2" style="vertical-align: middle;width: 42%;height: 180px;">
+                                                    <div class="div_relative" style="z-index: 50;">同意。
+								
+                                                        <div class="div_a">
+                                                            <div class="div_b">
+                                                                <img id="pic1" src="http://192.168.21.34:8084/zh_hczz/images/gbkafjwadd.gif" style="z-index: 2px;" />
+                                                            </div>
+                                                            <div class="div_c">
+                                                                <img id="pic2" src="http://192.168.21.34:8084/zh_hczz/images/lgw.gif" style="z-index:-1;" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="float: right;margin-right: 80px;z-index: 5;">2023年05月22日</div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="td5" style="width: 8%;">
+							公
+                                                    <br />安
+                                                    <br />机
+                                                    <br />关
+                                                    <br />意
+                                                    <br />见
+                                                </td>
+                                                <td class="td2" style="vertical-align: middle;width: 92%;height: 180px;" colspan="3">
+                                                    <div class="div_relative" style="z-index: 50;">
+                                                        <div class="div_a">
+                                                            <div class="div_b">
+										
+									</div>
+                                                            <div class="div_c">
+										
+									</div>
+                                                        </div>
+                                                    </div>
+                                                    <div style="float: right;margin-right: 80px;z-index: 5;"></div>
+                                                </td>
+                                                <tr>
+                                                    <td class="td5">备注</td>
+                                                    <td class="td2" style="height: 100px;" colspan="3">备注</td>
+                                                </tr>
+                                            </table>
+                                            <p>
+				7
+			
+                                            </div>
+                                            <!-- 线索情况反馈表,填表单位,反馈表中协查人第一个人的单位名称，日期，前面录入的时间为反馈时间。承办人，反馈表中协查人，当指派为多个时，显示多个。 -->
+                                            <div class="PageNext"></div>
+                                            <div class="divyy content">
+                                                <div class="fm_mjqx">密级：内部</div>
+                                                <div class="fm_mjqx">保密期限：长期</div>
+                                                <div class="fm_bt">线索情况反馈表</div>
+                                                <table class="fm_tab1" style="border: 0px;" cellpadding="0" cellspacing="0">
+                                                    <tr style="height: 30px;">
+                                                        <td class="td5" style="width:70%;border-width: 0px; text-align: left;">填表单位（加盖公章）：网络警察支队四大队
+							
+                                                            <div style="position:relative;margin-top: -90px;">
+                                                                <div style="position: absolute; left: 0; top: 0;">
+                                                                    <img id="pic1" src="http://192.168.21.34:8084/zh_hczz/images/gbkafjwadd.gif" style="z-index: 2px;" />
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="td5" style="border-width: 0px;text-align: right;letter-spacing: 0px;">填表日期：2023年05月04日</td>
+                                                    </tr>
+                                                </table>
+                                                <table class="fm_tab1" cellpadding="0" cellspacing="0">
+                                                    <tr>
+                                                        <td class="td5" style="width: 20%;">案事件名称</td>
+                                                        <td class="td2" style="width: 80%;">案件／警情567</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="td5" style="padding: 5px;">采取数据查询
+                                                            <br>文书编号
+						
+                                                        </td>
+                                                        <td class="td2" style="width: 92%;">435</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="td5">反馈方式</td>
+                                                        <td class="td2" style="text-align: center;">
+                                                            <label>
+                                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />口头&nbsp;
+                                                            </label>
+                                                            <label>
+                                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox" checked />电子&nbsp;
+                                                            </label>
+                                                            <label>
+                                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />电话&nbsp;
+                                                            </label>
+                                                            <label>
+                                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />复听&nbsp;
+                                                            </label>
+                                                            <label>
+                                                                <input onclick="return false;" class="ipt_chekbox" style="margin-bottom: 4px;" type="checkbox"  />文档&nbsp;
+                                                            </label>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="td5">反馈时间</td>
+                                                        <td class="td2" style="width: 92%;">2023 年05 月04 日</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="td5">承办人</td>
+                                                        <td class="td2" style="width: 92%;">梁*成</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="td5">反馈情况</td>
+                                                        <td class="td2" style="height: 320px;vertical-align: middle;" colspan="3">追加
+                                                            <font style="color:red;font-weight:bolder;"></font>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="td5">办案单位
+                                                            <br>确认签收
+                                                            <br>（签字）
+						
+                                                        </td>
+                                                        <td class="td2" style="height: 140px;vertical-align: middle;" colspan="3">
+                                                            <div class="div_relative" style="z-index: 50;">
+								
+							234
+							
+							
+								
+                                                                <div class="div_a">
+                                                                    <div style="position: absolute;left: 200px;top: -130px;width: 15%;z-index: -10;">
+                                                                        <img id="pic2" src="http://192.168.21.34:8084/zh_hczz/images/lgw.gif" style="z-index:-1;" />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                                <p>
+				8
+			
+                                                </div>
+                                            </body>
+                                        </html>
