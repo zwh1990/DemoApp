@@ -65,5 +65,30 @@
             android:layout_height="50dp"
             android:text="图片涂鸦" />
 
+        <Button
+            android:id="@+id/bt_get_sensor_data"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="获取传感器数据" />
+
+        <Button
+            android:id="@+id/bt_echart"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Echart表格" />
+
+        <Button
+            android:id="@+id/bt_custom_view"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Canvas自定义控件" />
+
+        <Button
+            android:id="@+id/bt_float"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="悬浮球的效果" />
+
+
     </LinearLayout>
 </ScrollView>

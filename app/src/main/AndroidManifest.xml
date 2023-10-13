@@ -19,33 +19,45 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.zwh.demoapp.acts.HWScanQrCodeActivity"
+            android:name=".acts.FloatActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.PictureGraffitiActivity"
+            android:name=".acts.CustomCanvasViewActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.ExcelFormActivity"
+            android:name=".acts.EchartActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.video.VideoPlayActivity"
+            android:name=".acts.GetSensorDataActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.LazyPageActivity"
+            android:name=".acts.HWScanQrCodeActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.ZipActivity"
+            android:name=".acts.PictureGraffitiActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.DecodeQrCodeActivity"
+            android:name=".acts.ExcelFormActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.EncodeQrCodeActivity"
+            android:name=".video.VideoPlayActivity"
             android:exported="true" />
         <activity
-            android:name="com.zwh.demoapp.acts.InstallApkActivity"
+            android:name=".acts.LazyPageActivity"
             android:exported="true" />
-        <activity android:name="com.zwh.demoapp.acts.MainActivity">
+        <activity
+            android:name=".acts.ZipActivity"
+            android:exported="true" />
+        <activity
+            android:name=".acts.DecodeQrCodeActivity"
+            android:exported="true" />
+        <activity
+            android:name=".acts.EncodeQrCodeActivity"
+            android:exported="true" />
+        <activity
+            android:name=".acts.InstallApkActivity"
+            android:exported="true" />
+        <activity android:name=".acts.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -13,9 +13,13 @@ import androidx.annotation.Nullable;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.zwh.demoapp.R;
+import com.zwh.demoapp.acts.CustomCanvasViewActivity;
 import com.zwh.demoapp.acts.DecodeQrCodeActivity;
+import com.zwh.demoapp.acts.EchartActivity;
 import com.zwh.demoapp.acts.EncodeQrCodeActivity;
 import com.zwh.demoapp.acts.ExcelFormActivity;
+import com.zwh.demoapp.acts.FloatActivity;
+import com.zwh.demoapp.acts.GetSensorDataActivity;
 import com.zwh.demoapp.acts.InstallApkActivity;
 import com.zwh.demoapp.acts.LazyPageActivity;
 import com.zwh.demoapp.acts.PictureGraffitiActivity;
@@ -71,6 +75,10 @@ public class MainFragment extends BaseFragment {
             R.id.bt_lazy_page,
             R.id.bt_excel_form,
             R.id.bt_picture_graffiti,
+            R.id.bt_get_sensor_data,
+            R.id.bt_echart,
+            R.id.bt_custom_view,
+            R.id.bt_float,
     })
     public void onClick(View view) {
         switch (view.getId()) {
@@ -101,6 +109,18 @@ public class MainFragment extends BaseFragment {
                 break;
             case R.id.bt_picture_graffiti:
                 startActivity(new Intent(getContext(), PictureGraffitiActivity.class));
+                break;
+            case R.id.bt_get_sensor_data:
+                startActivity(new Intent(getContext(), GetSensorDataActivity.class));
+                break;
+            case R.id.bt_echart:
+                startActivity(new Intent(getContext(), EchartActivity.class));
+                break;
+            case R.id.bt_custom_view:
+                startActivity(new Intent(getContext(), CustomCanvasViewActivity.class));
+                break;
+            case R.id.bt_float:
+                startActivity(new Intent(getContext(), FloatActivity.class));
                 break;
             default:
                 break;
