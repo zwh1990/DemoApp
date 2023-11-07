@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.zwh.demoapp.R;
 import com.zwh.demoapp.acts.CustomCanvasViewActivity;
+import com.zwh.demoapp.acts.CustomNavigationActivity;
 import com.zwh.demoapp.acts.DecodeQrCodeActivity;
 import com.zwh.demoapp.acts.EchartActivity;
 import com.zwh.demoapp.acts.EncodeQrCodeActivity;
@@ -23,6 +24,7 @@ import com.zwh.demoapp.acts.GetSensorDataActivity;
 import com.zwh.demoapp.acts.InstallApkActivity;
 import com.zwh.demoapp.acts.LazyPageActivity;
 import com.zwh.demoapp.acts.PictureGraffitiActivity;
+import com.zwh.demoapp.acts.RegularActivity;
 import com.zwh.demoapp.acts.ZipActivity;
 import com.zwh.demoapp.base.BaseFragment;
 import com.zwh.demoapp.utils.LOGUtils;
@@ -79,6 +81,8 @@ public class MainFragment extends BaseFragment {
             R.id.bt_echart,
             R.id.bt_custom_view,
             R.id.bt_float,
+            R.id.bt_regular,
+            R.id.bt_custom_navigation,
     })
     public void onClick(View view) {
         switch (view.getId()) {
@@ -121,6 +125,12 @@ public class MainFragment extends BaseFragment {
                 break;
             case R.id.bt_float:
                 startActivity(new Intent(getContext(), FloatActivity.class));
+                break;
+            case R.id.bt_regular:
+                startActivity(new Intent(getContext(), RegularActivity.class));
+                break;
+            case R.id.bt_custom_navigation:
+                startActivity(new Intent(getContext(), CustomNavigationActivity.class));
                 break;
             default:
                 break;

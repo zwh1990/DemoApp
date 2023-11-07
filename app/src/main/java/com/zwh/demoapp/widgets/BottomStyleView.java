@@ -76,7 +76,8 @@ public class BottomStyleView extends View {
     }
 
     private int calculateHeight() {
-        return 360;
+        int height = mCxt.getResources().getDisplayMetrics().heightPixels;
+        return height/6;
     }
 
     private int calculateScreenWidth() {
@@ -85,6 +86,7 @@ public class BottomStyleView extends View {
 
     private void initView() {
         setBackgroundColor(Color.GRAY);
+//        setAlpha(0.1f);
         mLinePaint = new Paint();
         mLinePaint.setColor(Color.BLACK);
         mLinePaint.setStrokeWidth(2f);

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <com.zwh.demoapp.widgets.CustomBottomSingleView
+        android:id="@+id/cbsv_aj"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:singleIcon="@drawable/ic_zh_shenp"
+        app:title="案件" />
+
+    <com.zwh.demoapp.widgets.CustomBottomSingleView
+        android:id="@+id/cbsv_rw"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:singleIcon="@drawable/ic_tab_spy"
+        app:title="任务" />
+
+    <com.zwh.demoapp.widgets.CustomBottomSingleView
+        android:id="@+id/cbsv_sh"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:singleIcon="@drawable/ic_clear_evil"
+        android:visibility="gone"
+        app:title="扫黑" />
+
+    <com.zwh.demoapp.widgets.CustomBottomSingleView
+        android:id="@+id/cbsv_bgc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:singleIcon="@drawable/ic_armory"
+        android:visibility="gone"
+        app:title="兵工厂" />
+
+    <com.zwh.demoapp.widgets.CustomBottomSingleView
+        android:id="@+id/cbsv_tj"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:singleIcon="@drawable/ic_statistics"
+        app:title="统计" />
+
+    <com.zwh.demoapp.widgets.CustomBottomSingleView
+        android:id="@+id/cbsv_mine"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        app:singleIcon="@drawable/ic_tab_mine"
+        app:title="我的" />
+
+</LinearLayout>

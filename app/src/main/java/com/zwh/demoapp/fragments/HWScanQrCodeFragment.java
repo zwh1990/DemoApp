@@ -28,6 +28,7 @@ import com.zwh.demoapp.utils.LOGUtils;
 
 import java.io.IOException;
 
+import butterknife.Action;
 import butterknife.BindView;
 
 /**
@@ -95,7 +96,6 @@ public class HWScanQrCodeFragment extends BaseFragment implements View.OnClickLi
         remoteView.setOnResultCallback(new OnResultCallback() {
             @Override
             public void onResult(HmsScan[] result) {
-                //Check the result.
                 if (result != null && result.length > 0 && result[0] != null && !TextUtils.isEmpty(result[0].getOriginalValue())) {
                     LOGUtils.w(TAG, "value--->" + result[0].getOriginalValue());
                     Intent intent = new Intent();

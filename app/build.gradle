@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
     defaultConfig {
         applicationId "com.zwh.demoapp"
         minSdkVersion 23
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -37,7 +37,6 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'com.squareup.retrofit2:retrofit:2.6.1'
-    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
     implementation 'cn.jzvd:jiaozivideoplayer:7.7.0'
     /**
      * 弹窗
@@ -56,4 +55,6 @@ dependencies {
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
     // 华为Hms 扫码
     implementation 'com.huawei.hms:scanplus:2.1.0.300'
+    //权限认证
+    implementation 'com.yanzhenjie:permission:2.0.0-rc5'
 }

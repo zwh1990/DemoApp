@@ -5,4 +5,10 @@
         <attr name="init_lazy_item_offset" format="float" />
     </declare-styleable>
 
+
+    <declare-styleable name="NavigationSingleView">
+        <attr name="title" format="string"/>
+        <attr name="singleIcon" format="reference"/>
+    </declare-styleable>
+
 </resources>
